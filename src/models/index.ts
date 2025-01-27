@@ -24,7 +24,7 @@ export const sequelize = new Sequelize(CONFIG.DATABASE.NAME, CONFIG.DATABASE.USE
 // can safely import { sequelize } from this file without circular references
 import Book from "./book";
 import Film from "./film";
-import Translation from "./translation";
+import Translation from "./translatableItem";
 
 // Finally, export all models
 export { Book, Film, Translation };

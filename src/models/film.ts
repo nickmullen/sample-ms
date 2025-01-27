@@ -1,24 +1,8 @@
-// models/film.ts
 import { Model, DataTypes, Optional } from "sequelize";
 import { sequelize } from "./index";
-import Translation from "./translation";
+import TranslatableItem from "./translatableItem";
 
-interface FilmAttributes {
-  id: string;
-  director: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-type FilmCreationAttributes = Optional<FilmAttributes, "id" | "createdAt" | "updatedAt">;
-
-class Film extends Model<FilmAttributes, FilmCreationAttributes> implements FilmAttributes {
-  public id!: string;
-  public director!: string;
-
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-}
+class Film extends Model {}
 
 Film.init(
   {
@@ -40,7 +24,7 @@ Film.init(
 );
 
 // Polymorphic association: Film can have many translations
-Film.hasMany(Translation, {
+Film.hasMany(TranslatableItem, {
   foreignKey: "recordId",
   constraints: false,
   scope: {
@@ -48,7 +32,7 @@ Film.hasMany(Translation, {
   }
 });
 
-Translation.belongsTo(Film, {
+TranslatableItem.belongsTo(Film, {
   foreignKey: "recordId",
   constraints: false
 });

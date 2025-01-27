@@ -37,7 +37,7 @@ const createServer = () => {
   });
 
   /** Routes */
-  app.use("/v1", router);
+  app.use("/", router);
 
   /** Error Handling - Note this must be the last middleware*/
   app.use(errorMiddleware);

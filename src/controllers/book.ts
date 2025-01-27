@@ -2,11 +2,12 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 // import readBook from "../services/readBook";
 import LOG from "../utils/log";
 import BookService from "../services/book";
+import { NotFoundError } from "../middleware/error";
 
-const create = (req: Request, res: Response, next: NextFunction) => {
-  const { author, translations } = req.body;
+const createBook = (req: Request, res: Response, next: NextFunction) => {
+  const { author, names, descriptions } = req.body;
 
-  BookService.createBook({ author, translations })
+  BookService.createBook({ author, names, descriptions })
     .then((bookWithTranslations) => {
       return res.status(201).json({
         message: "Book created successfully",
@@ -15,11 +16,19 @@ const create = (req: Request, res: Response, next: NextFunction) => {
     })
     .catch((error: any) => {
       LOG.error("[BookConnector] createBook error:", error);
-      return res.status(500).json({ error: "Failed to create book" });
+      return res.status(500).send({ message: "Failed to create book" });
     });
 };
 
-const read = (req: Request, res: Response, next: NextFunction) => {
+const deleteBook = (req: Request, res: Response, next: NextFunction) => {
+  const bookId = req.params.id;
+
+  BookService.deleteBook(bookId).then((result) => {
+    return res.status(204).send(result);
+  });
+};
+
+const readBook = (req: Request, res: Response, next: NextFunction) => {
   const bookId = req.params.id;
 
   BookService.readBook(bookId)
@@ -30,9 +39,12 @@ const read = (req: Request, res: Response, next: NextFunction) => {
       });
     })
     .catch((error: any) => {
+      if (error instanceof NotFoundError) {
+        return res.status(404).send({ message: "Not found: " + bookId });
+      }
       LOG.error("[BookConnector] read error:", error);
-      return res.status(500).json({ error: "Failed to read book" });
+      return res.status(500).send({ message: "Failed to read book" });
     });
 };
 
-export default { create, read };
+export default { createBook, deleteBook, readBook };

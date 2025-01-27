@@ -20,11 +20,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      name: {
+      key: {
         type: Sequelize.STRING,
         allowNull: true
       },
-      description: {
+      value: {
         type: Sequelize.TEXT,
         allowNull: true
       },

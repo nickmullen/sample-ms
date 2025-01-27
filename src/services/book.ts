@@ -1,17 +1,19 @@
-// services/bookService.ts
-import { v4 as uuidv4 } from "uuid";
+// A single service class isn't best practice.
+
 import Book from "../models/book";
-import Translation from "../models/translation";
+import Translation from "../models/translatableItem";
+import { v4 as uuidv4 } from "uuid";
+import { NotFoundError } from "../middleware/error";
 
 interface TranslationInput {
   language: string;
-  name: string;
-  description: string;
+  value: string;
 }
 
 interface CreateBookInput {
   author: string;
-  translations: TranslationInput[];
+  names: TranslationInput[];
+  descriptions: TranslationInput[];
 }
 
 class BookService {
@@ -25,24 +27,32 @@ class BookService {
     });
 
     // 2. Create Translations
-    const translationPromises = data.translations.map((t) => {
+    const translationNamePromises = data.names.map((t) => {
+      console.log("****", t);
       return Translation.create({
         id: uuidv4(),
-        recordId: book.id,
+        recordId: bookId,
         recordType: "book",
         language: t.language,
-        name: t.name,
-        description: t.description
+        key: "name",
+        value: t.value
       });
     });
-    await Promise.all(translationPromises);
-
-    // 3. Optionally, fetch the Book with its translations and return that.
-    const bookWithTranslations = await Book.findByPk(book.id, {
-      include: [Translation]
+    const translationDescriptionPromises = data.descriptions.map((t) => {
+      console.log("****", t);
+      return Translation.create({
+        id: uuidv4(),
+        recordId: bookId,
+        recordType: "book",
+        language: t.language,
+        key: "description",
+        value: t.value
+      });
     });
+    await Promise.all(translationNamePromises);
+    await Promise.all(translationDescriptionPromises);
 
-    return bookWithTranslations; // Or just 'book' if you prefer
+    return this.readBook(bookId); // Or just 'book' if you prefer
   }
 
   public static async readBook(id: string) {
@@ -50,7 +60,18 @@ class BookService {
       include: [Translation]
     });
 
+    if (!bookWithTranslations) throw new NotFoundError();
+
     return bookWithTranslations; // Or just 'book' if you prefer
+  }
+
+  public static async deleteBook(id: string) {
+    const bookToDestroy = await Book.findByPk(id);
+    if (bookToDestroy) {
+      await bookToDestroy.destroy(); // this triggers hooks in the Book model
+    } else {
+      throw new NotFoundError("Book with that id wasn't found");
+    }
   }
 }
 

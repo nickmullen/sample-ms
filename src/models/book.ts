@@ -1,21 +1,22 @@
-// models/book.ts
 import { Model, DataTypes, Optional } from "sequelize";
 import { sequelize } from "./index";
-import Translation from "./translation"; // single translations model
+import TranslatableItem from "./translatableItem";
 
+// Define the attributes of the Book model
 interface BookAttributes {
   id: string;
   author: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
-type BookCreationAttributes = Optional<BookAttributes, "id" | "createdAt" | "updatedAt">;
+// Define the optional attributes for creating a Book
+interface BookCreationAttributes extends Optional<BookAttributes, "id"> {}
 
+// Extend the Sequelize Model class
 class Book extends Model<BookAttributes, BookCreationAttributes> implements BookAttributes {
-  public id!: string;
-  public author!: string;
+  public id!: string; // `id` is required and non-nullable
+  public author!: string; // `author` is required and non-nullable
 
+  // Timestamps (automatically added by Sequelize if `timestamps: true`)
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -39,16 +40,26 @@ Book.init(
 );
 
 // Polymorphic association: Book can have many translations
-Book.hasMany(Translation, {
+Book.hasMany(TranslatableItem, {
   foreignKey: "recordId",
-  constraints: false, // disable foreign key constraint if you want pure polymorphic
+  constraints: false, // disable foreign key constraint as also related to films
   scope: {
     recordType: "book" // ensure we only get translations of type 'book'
   }
 });
 
+// because of that polymorphism, we have to handle "delete" cascades ourself.   We _could_ handle this explitly in the service class if we preferred.
+Book.beforeDestroy(async (book, options) => {
+  await TranslatableItem.destroy({
+    where: {
+      recordId: book.dataValues.id,
+      recordType: "book"
+    }
+  });
+});
+
 // Conversely, translation belongs to a "Book" in the sense that recordType='book'
-Translation.belongsTo(Book, {
+TranslatableItem.belongsTo(Book, {
   foreignKey: "recordId",
   constraints: false
 });
