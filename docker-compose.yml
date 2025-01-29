@@ -1,0 +1,35 @@
+services:
+  benefit-ms:
+    build: .
+    volumes:
+      - .:/src:rw
+    environment:
+      - "DB_HOST=mysql"
+      - "DB_PORT=3306"
+      - "DB_USERNAME=sampleServiceUser"
+      - "DB_PASSWORD=myPassword"
+      - "DB_DATABASE=sample-service"
+      - "NODE_ENV=development"
+      - "SERVICE_NAME=sample-ms"
+      - "SERVER_PORT=9000"
+      - "LOG_LEVEL=info"
+      - "LANGUAGES=en,fr"
+    ports:
+      - "9000:9000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+  mysql:
+    image: mysql:latest
+    environment:
+      - "MYSQL_USER=sampleServiceUser"
+      - "MYSQL_PASSWORD=myPassword"
+      - "MYSQL_RANDOM_ROOT_PASSWORD=true"
+      - "MYSQL_DATABASE=sample-service"
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin","ping","-h","localhost"]
+      start_period: 3s
+      timeout: 2s
+      retries: 10
