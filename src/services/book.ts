@@ -1,7 +1,8 @@
 // A single service class isn't best practice.
+// We would rather each method was it's own class - otherwise this file could become very big
 
 import Book from "../models/book";
-import Translation from "../models/translatableItem";
+import TranslatableItem from "../models/translatableItem";
 import { v4 as uuidv4 } from "uuid";
 import { NotFoundError } from "../middleware/error";
 
@@ -16,6 +17,14 @@ interface CreateBookInput {
   descriptions: TranslationInput[];
 }
 
+function filterTranslations(translations: Array<TranslatableItem>, keyWanted: string) {
+  return translations
+    .filter((translation) => translation.dataValues.key === keyWanted)
+    .map((translation) => {
+      return { language: translation.dataValues.language, value: translation.dataValues.value };
+    });
+}
+
 class BookService {
   public static async createBook(data: CreateBookInput) {
     // 1. Create the Book
@@ -28,8 +37,7 @@ class BookService {
 
     // 2. Create Translations
     const translationNamePromises = data.names.map((t) => {
-      console.log("****", t);
-      return Translation.create({
+      return TranslatableItem.create({
         id: uuidv4(),
         recordId: bookId,
         recordType: "book",
@@ -39,8 +47,7 @@ class BookService {
       });
     });
     const translationDescriptionPromises = data.descriptions.map((t) => {
-      console.log("****", t);
-      return Translation.create({
+      return TranslatableItem.create({
         id: uuidv4(),
         recordId: bookId,
         recordType: "book",
@@ -55,14 +62,49 @@ class BookService {
     return this.readBook(bookId); // Or just 'book' if you prefer
   }
 
+  public static async getBooks() {
+    const books = await Book.findAll({
+      include: [{ model: TranslatableItem, as: "TranslatableItems", attributes: ["language", "key", "value"] }]
+    });
+    return books.map((book) => {
+      // Separate "name" and "description" into distinct arrays
+      let names: Array<any> = [];
+      let descriptions: Array<any> = [];
+
+      if (book.dataValues.TranslatableItems) {
+        names = filterTranslations(book.dataValues.TranslatableItems, "name");
+        descriptions = filterTranslations(book.dataValues.TranslatableItems, "description");
+      }
+      return {
+        id: book.dataValues.id,
+        author: book.dataValues.author,
+        names,
+        descriptions
+      };
+    });
+  }
+
   public static async readBook(id: string) {
-    const bookWithTranslations = await Book.findByPk(id, {
-      include: [Translation]
+    const book = await Book.findByPk(id, {
+      include: [{ model: TranslatableItem, as: "TranslatableItems", attributes: ["language", "key", "value"] }]
     });
 
-    if (!bookWithTranslations) throw new NotFoundError();
+    if (!book) throw new NotFoundError();
 
-    return bookWithTranslations; // Or just 'book' if you prefer
+    // Separate "name" and "description" into distinct arrays
+    let names: Array<any> = [];
+    let descriptions: Array<any> = [];
+
+    if (book.dataValues.TranslatableItems) {
+      names = filterTranslations(book.dataValues.TranslatableItems, "name");
+      descriptions = filterTranslations(book.dataValues.TranslatableItems, "description");
+    }
+    return {
+      id: book.dataValues.id,
+      author: book.dataValues.author,
+      names,
+      descriptions
+    };
   }
 
   public static async deleteBook(id: string) {

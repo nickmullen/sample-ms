@@ -1,4 +1,4 @@
-import { Model, DataTypes, Optional } from "sequelize";
+import { Model, DataTypes, Optional, HasManyGetAssociationsMixin } from "sequelize";
 import { sequelize } from "./index";
 import TranslatableItem from "./translatableItem";
 
@@ -6,6 +6,7 @@ import TranslatableItem from "./translatableItem";
 interface BookAttributes {
   id: string;
   author: string;
+  TranslatableItems?: TranslatableItem[];
 }
 
 // Define the optional attributes for creating a Book
@@ -15,6 +16,12 @@ interface BookCreationAttributes extends Optional<BookAttributes, "id"> {}
 class Book extends Model<BookAttributes, BookCreationAttributes> implements BookAttributes {
   public id!: string; // `id` is required and non-nullable
   public author!: string; // `author` is required and non-nullable
+
+  // Association: Define TranslatableItems as an array
+  public TranslatableItems?: TranslatableItem[];
+
+  // Sequelize mixins for association methods
+  public getTranslatableItems!: HasManyGetAssociationsMixin<TranslatableItem>;
 
   // Timestamps (automatically added by Sequelize if `timestamps: true`)
   public readonly createdAt!: Date;

@@ -1,54 +1,42 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Benefit Service V3",
-    "description": "Benefit Service V3\n\nBenefit V3 adds support for Exclusion Groups\n\nThe Benefit Service V2 is meant to improve on 3 things:\n1. Move the service to prod-ng and prod-eg\n2. Add capabilities to mark benefits as “excluded”\n3. Provide additional capabilities for easier benefit group management",
-    "version": "3.0.0"
-  },
-  "externalDocs": {
-    "description": "Find out more about Benefit Service V3 <-- needs updating",
-    "url": "https://reliancehmo.atlassian.net/wiki/spaces/CD/pages/410976473/Benefit+Service+V2+Technical+Documentation-UPDATE"
+    "title": "Sample Service V3",
+    "description": "Give a basic template that demonstrates how to run a lightweight microservice that uses mySQL in a way that makes Marcus happy (or at least, less grumpy)",
+    "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "http://localhost:9091/v3"
+      "url": "http://localhost:9000/v1"
     }
   ],
   "tags": [
     {
-      "name": "benefits",
-      "description": "Everything about Benefits",
+      "name": "books",
+      "description": "Everything about Books",
       "externalDocs": {
         "description": "Find out more",
-        "url": "https://reliancehmo.atlassian.net/wiki/spaces/CD/pages/410976473/Benefit+Service+V2+Technical+Documentation"
+        "url": "https://reliancehmo.atlassian.net/wiki/spaces/CD/pages/put_a_meaningful_link_here"
       }
     },
     {
-      "name": "benefitGroups",
-      "description": "Everything about Benefit Groups",
+      "name": "films",
+      "description": "Everything about Films",
       "externalDocs": {
         "description": "Find out more",
-        "url": "https://reliancehmo.atlassian.net/wiki/spaces/CD/pages/410976473/Benefit+Service+V2+Technical+Documentation"
-      }
-    },
-    {
-      "name": "exclusionGroups",
-      "description": "management of exclusionGroups",
-      "externalDocs": {
-        "description": "Muhammad will update",
-        "url": "https://random.com"
+        "url": "https://reliancehmo.atlassian.net/wiki/spaces/CD/pages/put_a_meaningful_link_here"
       }
     }
   ],
   "paths": {
-    "/benefits": {
+    "/books": {
       "get": {
         "tags": [
-          "benefits"
+          "books"
         ],
-        "summary": "get benefits matching filter",
-        "description": "Get benefits matching a search parameter.  The search parameter must be a minimum of 4 characters long to prevent this returning the whole DB",
-        "operationId": "getBenefitBySearch",
+        "summary": "get all books NOT IMPLEMENTED",
+        "description": "Get all books matching a search parameter.  ",
+        "operationId": "getBooksBySearch",
         "parameters": [
           {
             "name": "search",
@@ -67,7 +55,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BenefitArrayResponse"
+                  "$ref": "#/components/schemas/BookArrayResponse"
                 }
               }
             }
@@ -79,16 +67,16 @@
       },
       "post": {
         "tags": [
-          "benefits"
+          "books"
         ],
-        "summary": "add a single benefit",
-        "description": "Creation of a new benefit, usually via the TBO service. Ordinarily, you would just know the snomed code and names, however if the benfit group id and the exclusion group id are known, they may optionally be supplied",
-        "operationId": "addBenefit",
+        "summary": "Create a book",
+        "description": "Create a book along with all the required translations",
+        "operationId": "addBook",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BenefitTemplate"
+                "$ref": "#/components/schemas/BookTemplate"
               }
             }
           }
@@ -99,7 +87,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BenefitResponse"
+                  "$ref": "#/components/schemas/BookResponse"
                 }
               }
             }
@@ -118,447 +106,19 @@
         ]
       }
     },
-    "/benefits/{snomedCode}": {
-      "put": {
-        "tags": [
-          "benefits"
-        ],
-        "summary": "Update a single benefit",
-        "description": "",
-        "operationId": "updateBenefit",
-        "parameters": [
-          {
-            "name": "snomedCode",
-            "in": "path",
-            "description": "Snomed Code of the benefit",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BenefitTemplate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BenefitResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request body"
-          },
-          "404": {
-            "description": "Benefit not found"
-          },
-          "409": {
-            "description": "SnomedCode in body doesn't match that in path"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
+    "/books/{id}": {
       "get": {
         "tags": [
-          "benefits"
+          "books"
         ],
         "summary": "Get a single benefit",
         "description": "",
         "operationId": "getBenefit",
         "parameters": [
           {
-            "name": "snomedCode",
+            "name": "id",
             "in": "path",
-            "description": "Snomed Code of the benefit",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BenefitResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Benefit not found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/ungroupedBenefits": {
-      "get": {
-        "tags": [
-          "benefits"
-        ],
-        "summary": "Get all Ungrouped benefits",
-        "description": "",
-        "operationId": "ungroupedBenefits",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "description": "Page number",
-            "schema": {
-              "type": "integer",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "description": "Number of items per page",
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "content": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/BenefitArrayResponse"
-                      }
-                    },
-                    "totalPages": {
-                      "type": "integer",
-                      "example": 1
-                    },
-                    "totalElements": {
-                      "type": "integer",
-                      "example": 1
-                    },
-                    "size": {
-                      "type": "integer",
-                      "example": 100
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/benefitGroups": {
-      "get": {
-        "tags": [
-          "benefitGroups"
-        ],
-        "summary": "Get all benefit groups",
-        "description": "Gives a list of all the benefit groups",
-        "operationId": "getBenefitGroups",
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "content": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/BenefitGroupArrayResponse"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "benefitGroups"
-        ],
-        "summary": "Create a new benefit group",
-        "description": "Here for completion, but ordinarily these are created via seed file",
-        "operationId": "createBenefitGroup",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BenefitGroupTemplate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BenefitGroupResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request / missing languages"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/benefitGroups/{groupId}": {
-      "parameters": [
-        {
-          "name": "groupId",
-          "in": "path",
-          "description": "ID of the benefit group",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "get": {
-        "tags": [
-          "benefitGroups"
-        ],
-        "summary": "Get a single benefit group",
-        "description": "",
-        "operationId": "getASingleBenefitGroup",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BenefitGroupArrayResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Benefit Group does not exist"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "benefitGroups"
-        ],
-        "summary": "Update a new benefit group",
-        "description": "Here for completion, but ordinarily these are created via seed file",
-        "operationId": "updateBenefitGroup",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BenefitGroupTemplate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BenefitGroupResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request / missing languages"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/benefitGroups/{groupId}/benefits": {
-      "get": {
-        "tags": [
-          "benefitGroups"
-        ],
-        "summary": "Get all the benefits in a benefit group",
-        "parameters": [
-          {
-            "name": "groupId",
-            "in": "path",
-            "description": "ID of the benefit group",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BenefitArrayResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Benefit Group does not exist"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/exclusionGroups": {
-      "get": {
-        "tags": [
-          "exclusionGroups"
-        ],
-        "summary": "Get all the exclusion groups",
-        "description": "Returns a nested list of all the exclusion groups. Method usually used so that a user can classify a benefit under the right exclusion category",
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExclusionGroupArrayResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "exclusionGroups"
-        ],
-        "summary": "Create a new exclusion group",
-        "description": "Create a new exclusion group via UI",
-        "operationId": "createExclusionGroup",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExclusionGroupTemplate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "successfully created exclusion group",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExclusionGroupResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request / missing languages"
-          }
-        }
-      }
-    },
-    "/exclusionGroups/{exclusionGroupId}": {
-      "put": {
-        "tags": [
-          "exclusionGroups"
-        ],
-        "parameters": [
-          {
-            "name": "exclusionGroupId",
-            "in": "path",
-            "description": "ID of the exclusion group",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExclusionGroupTemplate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExclusionGroupResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request / missing languages"
-          },
-          "404": {
-            "description": "Exclusion Group does not exist"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/exclusionGroups/{exclusionGroupId}/benefits": {
-      "get": {
-        "tags": [
-          "exclusionGroups"
-        ],
-        "parameters": [
-          {
-            "name": "exclusionGroupId",
-            "in": "path",
-            "description": "ID of the exclusion group",
+            "description": "unique id of the book",
             "required": true,
             "schema": {
               "type": "string",
@@ -572,33 +132,16 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "content": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/BenefitArrayResponse"
-                      }
-                    },
-                    "totalPages": {
-                      "type": "integer",
-                      "example": 1
-                    },
-                    "totalElements": {
-                      "type": "integer",
-                      "example": 1
-                    },
-                    "size": {
-                      "type": "integer",
-                      "example": 100
-                    }
-                  }
+                  "$ref": "#/components/schemas/BookResponse"
                 }
               }
             }
           },
           "404": {
-            "description": "Exclusion Group does not exist"
+            "description": "Book not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -606,250 +149,157 @@
   },
   "components": {
     "schemas": {
-      "BenefitTemplate": {
-        "type": "object",
-        "required": [
-          "snomedCode",
-          "names"
-        ],
-        "properties": {
-          "snomed": {
-            "type": "string",
-            "example": "12345678"
+      "Book": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BookTemplate"
           },
-          "names": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Name"
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "example": "2022-12-01 21:00:00"
+              },
+              "updatedAt": {
+                "type": "string",
+                "example": "2022-12-02 12:00:00"
+              }
             }
+          }
+        ]
+      },
+      "BookArray": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Book"
+        }
+      },
+      "BookArrayResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/Message"
           },
-          "benefitGroupId": {
-            "type": "string",
-            "format": "uuid",
-            "example": "2f98dd70-58af-4e6c-a800-e409ca7447b1"
-          },
-          "exclusionGroupId": {
-            "type": "string",
-            "format": "uuid",
-            "example": "0a889930-6a70-49eb-8295-446d03d89cf3"
+          "books": {
+            "$ref": "#/components/schemas/BookArray"
           }
         }
       },
-      "Benefit": {
+      "BookResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "book": {
+            "$ref": "#/components/schemas/Book"
+          }
+        }
+      },
+      "BookTemplate": {
         "type": "object",
         "required": [
-          "snomedCode",
+          "author",
           "names",
-          "createdAt",
-          "lastModifiedAt"
+          "descriptions"
         ],
         "properties": {
-          "snomedCode": {
+          "author": {
             "type": "string",
-            "example": "12345678"
+            "example": "Joe Smith"
           },
           "names": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Name"
-            }
-          },
-          "benefitGroupId": {
-            "type": "string",
-            "format": "uuid",
-            "example": "2f98dd70-58af-4e6c-a800-e409ca7447b1"
-          },
-          "exclusionGroupId": {
-            "type": "string",
-            "format": "uuid",
-            "example": "0a889930-6a70-49eb-8295-446d03d89cf3"
-          },
-          "createdAt": {
-            "type": "string",
-            "example": "2022-12-01 21:00:00"
-          },
-          "updatedAt": {
-            "type": "string",
-            "example": "2022-12-02 12:00:00"
-          }
-        }
-      },
-      "BenefitArray": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Benefit"
-        }
-      },
-      "BenefitArrayResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "$ref": "#/components/schemas/Message"
-          },
-          "benefits": {
-            "$ref": "#/components/schemas/BenefitArray"
-          }
-        }
-      },
-      "BenefitResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "$ref": "#/components/schemas/Message"
-          },
-          "benefit": {
-            "$ref": "#/components/schemas/Benefit"
-          }
-        }
-      },
-      "BenefitGroup": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BenefitGroupTemplate"
-          },
-          {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "createdAt": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2022-12-01 21:00:00"
-              },
-              "updatedAt": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2022-12-02 12:00:00"
-              }
-            }
-          }
-        ]
-      },
-      "BenefitGroupResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "$ref": "#/components/schemas/Message"
-          },
-          "benefitGroup": {
-            "$ref": "#/components/schemas/BenefitGroup"
-          }
-        }
-      },
-      "BenefitGroupArray": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/BenefitGroup"
-        }
-      },
-      "BenefitGroupArrayResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "$ref": "#/components/schemas/Message"
-          },
-          "benefitGroups": {
-            "$ref": "#/components/schemas/BenefitGroupArray"
-          }
-        }
-      },
-      "BenefitGroupTemplate": {
-        "type": "object",
-        "properties": {
-          "names": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Name"
-            }
-          }
-        }
-      },
-      "ExclusionGroup": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ExclusionGroupTemplate"
-          },
-          {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "subGroups": {
-                "$ref": "#/components/schemas/ExclusionGroupArray"
-              },
-              "createdAt": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2022-12-01 21:00:00"
-              },
-              "updatedAt": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2022-12-02 12:00:00"
-              }
-            }
-          }
-        ]
-      },
-      "ExclusionGroupResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "$ref": "#/components/schemas/Message"
-          },
-          "benefitGroup": {
-            "$ref": "#/components/schemas/ExclusionGroup"
-          }
-        }
-      },
-      "ExclusionGroupArray": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/ExclusionGroup"
-        }
-      },
-      "ExclusionGroupArrayResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "$ref": "#/components/schemas/Message"
-          },
-          "benefitGroup": {
-            "$ref": "#/components/schemas/ExclusionGroupArray"
-          }
-        }
-      },
-      "ExclusionGroupTemplate": {
-        "type": "object",
-        "properties": {
-          "names": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Name"
+              "$ref": "#/components/schemas/TranslatedItem"
             }
           },
           "descriptions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Description"
+              "$ref": "#/components/schemas/TranslatedItem"
+            }
+          }
+        }
+      },
+      "Film": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FilmTemplate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "example": "2022-12-01 21:00:00"
+              },
+              "updatedAt": {
+                "type": "string",
+                "example": "2022-12-02 12:00:00"
+              }
+            }
+          }
+        ]
+      },
+      "FilmArray": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Film"
+        }
+      },
+      "FilmArrayResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "Films": {
+            "$ref": "#/components/schemas/FilmArray"
+          }
+        }
+      },
+      "FilmResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "Film": {
+            "$ref": "#/components/schemas/Film"
+          }
+        }
+      },
+      "FilmTemplate": {
+        "type": "object",
+        "required": [
+          "author",
+          "names",
+          "descriptions"
+        ],
+        "properties": {
+          "author": {
+            "type": "string",
+            "example": "Joe Smith"
+          },
+          "names": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TranslatedItem"
             }
           },
-          "parentId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true,
-            "description": "Id of the parent exclusion group"
+          "descriptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TranslatedItem"
+            }
           }
         }
       },
@@ -862,38 +312,22 @@
           }
         }
       },
-      "Name": {
+      "TranslatedItem": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "example": "Appendectomy"
-          },
           "language": {
             "type": "string",
             "example": "en"
-          }
-        }
-      },
-      "Description": {
-        "type": "object",
-        "properties": {
-          "description": {
-            "type": "string",
-            "example": "This is a verbose description of Appendectomy"
           },
-          "language": {
+          "key": {
             "type": "string",
-            "example": "en"
+            "example": "name"
+          },
+          "value": {
+            "type": "string",
+            "example": "The name"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "api_key": {
-        "type": "apiKey",
-        "name": "api_key",
-        "in": "header"
       }
     }
   }

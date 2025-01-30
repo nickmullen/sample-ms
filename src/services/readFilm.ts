@@ -1,7 +1,6 @@
-// services/bookService.ts
 import { v4 as uuidv4 } from "uuid";
 import Film from "../models/film";
-import Translation from "../models/translatableItem";
+import TranslatableItem from "../models/translatableItem";
 import { NotFoundError } from "../middleware/error";
 
 class ReadFilm {
@@ -12,12 +11,29 @@ class ReadFilm {
 
   public async read() {
     const film = await Film.findByPk(this.id, {
-      include: [Translation]
+      include: [{ model: TranslatableItem, as: "TranslatableItems", attributes: ["language", "key", "value"] }]
     });
 
     if (!film) throw new NotFoundError("Film with this ID not found");
 
-    // turn the translations into something better.  We're doing it longhand here, but look in the book model to see how to do this with hooks.
+    // Separate "name" and "description" into distinct arrays
+    const names: Array<{ language: string; value: string }> = [];
+    const descriptions: Array<{ language: string; value: string }> = [];
+    if (film.dataValues.TranslatableItems) {
+      film.dataValues.TranslatableItems.forEach((item) => {
+        if (item.dataValues.key === "name") {
+          names.push({ language: item.dataValues.language, value: item.dataValues.value ?? "" });
+        } else if (item.dataValues.key === "description") {
+          descriptions.push({ language: item.dataValues.language, value: item.dataValues.value ?? "" });
+        }
+      });
+    }
+    return {
+      id: film.dataValues.id,
+      author: film.dataValues.director,
+      names,
+      descriptions
+    };
 
     return film;
   }
