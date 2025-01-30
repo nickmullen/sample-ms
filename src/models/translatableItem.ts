@@ -1,7 +1,33 @@
-import { Model, DataTypes, Optional, Association, NonAttribute } from "sequelize";
+import { Model, DataTypes, Optional } from "sequelize";
 import { sequelize } from "./index";
 
-class TranslatableItem extends Model {}
+// Define the attributes of the TranslatableItem model
+interface TranslatableItemAttributes {
+  id: string;
+  recordId: string;
+  recordType: string;
+  language: string;
+  key: string;
+  value: string | null;
+}
+
+// Define optional attributes for creation
+interface TranslatableItemCreationAttributes extends Optional<TranslatableItemAttributes, "id"> {}
+
+class TranslatableItem
+  extends Model<TranslatableItemAttributes, TranslatableItemCreationAttributes>
+  implements TranslatableItemAttributes
+{
+  public id!: string;
+  public recordId!: string;
+  public recordType!: string;
+  public language!: string;
+  public key!: string;
+  public value!: string | null;
+
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+}
 
 TranslatableItem.init(
   {

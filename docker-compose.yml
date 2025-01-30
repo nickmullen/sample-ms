@@ -24,7 +24,7 @@ services:
     environment:
       - "MYSQL_USER=sampleServiceUser"
       - "MYSQL_PASSWORD=myPassword"
-      - "MYSQL_RANDOM_ROOT_PASSWORD=true"
+      - "MYSQL_ROOT_PASSWORD=myRootPassword"
       - "MYSQL_DATABASE=sample-ms"
     ports:
       - "3306:3306"

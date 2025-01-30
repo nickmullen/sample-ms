@@ -28,6 +28,20 @@ const deleteBook = (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
+const getBooks = (req: Request, res: Response, next: NextFunction) => {
+  BookService.getBooks()
+    .then((books) => {
+      return res.status(200).json({
+        message: "Found books",
+        books: books
+      });
+    })
+    .catch((error: any) => {
+      LOG.error("[BookConnector] read error:", error);
+      return res.status(500).send({ message: "Failed to read book" });
+    });
+};
+
 const readBook = (req: Request, res: Response, next: NextFunction) => {
   const bookId = req.params.id;
 
@@ -47,4 +61,4 @@ const readBook = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-export default { createBook, deleteBook, readBook };
+export default { createBook, deleteBook, getBooks, readBook };
