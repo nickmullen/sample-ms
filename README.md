@@ -78,7 +78,15 @@ npm install
 Create a file `.env` at the top level of the project. The code uses dotenv-safe which means your .env file MUST contain
 ALL of the values that are included in `.env.example`
 
+(once set we refer to the `CONFIG` object. See `/src/config/config.ts`) 
+
 #### Configure the database
+
+If you don't have one already, you can set up a local mysql db by running 
+```
+docker-compose up mysql
+```
+Which will run a dockerised mysql instance with a user and database already configured, but we still need to run migrations.
 
 ```
 npm run prepareDB
@@ -99,4 +107,58 @@ npm run seed:all
 What is happening under the hood when you run migration and seeds
 
 - you are running sequelize-cli, NOT your main body of code
-- sequlize-cli picks up config from the `.sequelizerc` file
+- sequlize-cli picks up config from the `.sequelizerc` file (and this in turn goes and has a look at `/src/config/sequelize.js`)
+
+The `/src/config/sequelize.js` file has some interesting features:
+- You can have a different config based on your `NODE_ENV`
+- You can easily swap "dialect" to use a DB other than mySQL (although you had better have a ***very*** good reason for doing so)
+- you can decide whether to store seed history
+  - sequelize stores migration history in a table `SequelizeMeta` and this is NOT optional.  You must explicitly say whether you want to store seed history (we have) and it will get logged in a table `SequelizeData`.
+
+
+#### Fire it up!
+
+To start the service in development mode:
+```
+npm run dev
+```
+This will auto restart the code whenever you make changes.
+Note there is a `.nodemon.json` file which has some interesting cofig in there.
+
+
+#### (optional) Check on OpenTelemetry
+
+OpenTelemetry is required on all of our projects, it's the main way of feeding data into NewRelic.
+You can start a local, dockerised version of an OTEL collector by checking out https://github.com/reliancehealthinc/DEV-Open-Telemetry-Collector
+You can then tail the logs to make sure when you make calls, that you see the events in the collector.
+
+Open telemetry is provided by the file `/src/instrumentation.ts`.  You will notice in the `package.json` file that the script to run in production includes a reference to this file.  When running in dev mode, it's invoked slightly differently via the `nodemon.json` config.
+
+
+## About "Polymorphism"
+It's a fancy way of saying a foreign key relationship, but one that can point to muliple tables.
+In this sample project we've two "parent" tables that both want to store "translatableItems" (names and descriptions). As we look in the `/src/models/book.ts` we see that 
+
+```mermaid
+erDiagram
+    BOOK ||--o{ TRANSLATION : has
+    FILM ||--o{ TRANSLATION : has
+    BOOK {
+        string id
+        string author
+    }
+    FILM {
+        string id
+        string director
+    }
+    TRANSLATION {
+        string id
+        string recordId
+        string recordType
+        string language
+        string key
+        string value
+    }
+```
+The pseudo-foreign key relationship is tracked by recordId and recordType in the Translation table.
+Looking into the book (and film) model, we can see that the relationship is defined there.

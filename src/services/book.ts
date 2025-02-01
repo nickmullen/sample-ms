@@ -27,6 +27,7 @@ function filterTranslations(translations: Array<TranslatableItem>, keyWanted: st
 
 class BookService {
   public static async createBook(data: CreateBookInput) {
+    console.log("<<<<<<", data);
     // 1. Create the Book
     const bookId: string = uuidv4();
 

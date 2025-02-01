@@ -1,0 +1,10 @@
+NODE_ENV = "development";
+SERVICE_NAME = "sample-ms";
+DB_HOST = "localhost";
+DB_PORT = "3306";
+DB_USERNAME = "sampleServiceUser";
+DB_PASSWORD = "myPassword";
+DB_DATABASE = "sample-ms";
+LOG_LEVEL = "info";
+LANGUAGES = "en,fr";
+SERVER_PORT = "9000";
